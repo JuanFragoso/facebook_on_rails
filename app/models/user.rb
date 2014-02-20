@@ -4,6 +4,8 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable, :omniauthable
 
+         has_many :posts, dependent: :destroy
+
      def self.find_or_create_from_auth_hash(auth_hash)
      	find_by_auth_hash(auth_hash) || create_from_auth_hash(auth_hash)
      end
@@ -22,7 +24,7 @@ class User < ActiveRecord::Base
      		email: auth_hash.info.email,
      		name: auth_hash.info.name,
      		oauth_token: auth_hash.credentials.token,
-     		oauth_expires_at: Time.at(auth_hash.credentials.espires_at)
+     		oauth_expires_at: Time.at(auth_hash.credentials.expires_at)
      		)
      end
 
@@ -36,5 +38,9 @@ class User < ActiveRecord::Base
      	else
      		super
      	end
+     end
+
+     def facebook
+        @facebook ||= Koala::Facebook::API.new(oauth_token)
      end
 end
